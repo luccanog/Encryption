@@ -21,7 +21,7 @@ class Symmetric : IEncryptor
             return _symmetric;
         }
     }
-    public void Run()
+    public void Encrypt()
     {
         Console.WriteLine("Digite o texto a ser criptografado:");
         string text = Console.ReadLine();
@@ -53,6 +53,11 @@ class Symmetric : IEncryptor
             Console.WriteLine("Falha ao realizar a criptografia.");
             throw;
         }
+
+    }
+
+    public void Decrypt()
+    {
 
     }
 }

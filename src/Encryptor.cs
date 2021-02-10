@@ -10,6 +10,6 @@ public class Encryptor
 
     public void Run()
     {
-        _encryptor.Run();
+        _encryptor.Encrypt();
     }
 }

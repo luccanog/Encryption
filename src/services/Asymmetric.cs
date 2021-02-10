@@ -16,7 +16,12 @@ class Assymetric : IEncryptor
             return _assymetric;
         }
     }
-    public void Run()
+    public void Encrypt()
+    {
+
+    }
+
+    public void Decrypt()
     {
 
     }
