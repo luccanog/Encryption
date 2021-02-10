@@ -10,13 +10,8 @@ namespace Encryption
         static void Main(string[] args)
         {
 
-            Console.WriteLine("Digite o texto a ser criptografado:");
-            string text = Console.ReadLine();
-
             Encryptor encryptor = new Encryptor(Symmetric.Instance);
-
             encryptor.Run();
-            Console.Read();
 
         }
     }
