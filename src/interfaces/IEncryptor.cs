@@ -1,4 +1,5 @@
 public interface IEncryptor
 {
-    void Run();
+    void Encrypt();
+    void Decrypt();
 }
