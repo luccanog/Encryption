@@ -12,10 +12,10 @@ public class Encryptor
 
     public void Run()
     {
-        Console.WriteLine("1 - CRIPTOGRAFANDO...\n");
+        Console.WriteLine("##### CRIPTOGRAFANDO #####\n");
         _encryptor.Encrypt();
 
-        Console.WriteLine("2 - DESCRIPTOGRAFANDO...\n");
+        Console.WriteLine("##### DESCRIPTOGRAFANDO #####\n");
         _encryptor.Decrypt();
     }
 }
