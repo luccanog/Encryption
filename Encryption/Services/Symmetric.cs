@@ -35,8 +35,8 @@ class Symmetric : IEncryptor
             using (FileStream myStream = new FileStream(outputPath, FileMode.OpenOrCreate))
             using (Aes aes = Aes.Create())
             {
+                aes.Padding = PaddingMode.PKCS7;
                 aes.Key = _key;
-
                 //Salva o vetor de inicializaçao no inicio do arquivo 
                 //Este dado será usado para a descriptografia.
                 byte[] iv = aes.IV;
@@ -67,11 +67,11 @@ class Symmetric : IEncryptor
             using (FileStream encryptedStream = new FileStream($"{Path.ENCRYPTED_FILES}/{OutputFile.Symmetric}.txt", FileMode.OpenOrCreate))
             using (Aes aes = Aes.Create())
             {
+                aes.Padding = PaddingMode.PKCS7;
                 //Lê o vetor de inicializaçao do inicio do arquivo.
                 byte[] iv = new byte[aes.IV.Length];
                 encryptedStream.Read(iv, 0, iv.Length);
                 var aesDecryptor = aes.CreateDecryptor(_key, iv);
-
                 Core.AesDecryption(encryptedStream, aesDecryptor, OutputFile.Symmetric);
             }
         }
