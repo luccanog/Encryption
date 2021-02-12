@@ -15,7 +15,7 @@ class Symmetric : IEncryptor
     }
     private static Symmetric _symmetric;
 
-    protected static byte[] _key = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 };
+    private static byte[] _key = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16 };
 
     public static Symmetric Instance
     {
@@ -37,6 +37,7 @@ class Symmetric : IEncryptor
             {
                 aes.Padding = PaddingMode.PKCS7;
                 aes.Key = _key;
+
                 //Salva o vetor de inicializaçao no inicio do arquivo 
                 //Este dado será usado para a descriptografia.
                 byte[] iv = aes.IV;
@@ -48,6 +49,7 @@ class Symmetric : IEncryptor
                     streamWriter.WriteLine(text);
                 }
             }
+
             Console.WriteLine("\nArquivo criptografado com sucesso!\n");
             Console.WriteLine($"Arquivo salvo em: {outputPath}\n");
 
