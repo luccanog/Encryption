@@ -2,12 +2,18 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 
-public class RetrieveKeys
+public class RetrievedKeys
 {
-    public byte[] AesKey;
-    public byte[] PrivateKey;
-    public byte[] Iv;
+    public byte[] AesKey { get; private set; }
+    public byte[] Iv { get; private set; }
+    public string RSAXmlString { get; private set; }
 
+    public RetrievedKeys(byte[] aesKey, byte[] iv, string rsaXmlString)
+    {
+        AesKey = aesKey;
+        RSAXmlString = rsaXmlString;
+        Iv = iv;
+    }
 }
 
 
@@ -52,12 +58,11 @@ class Assymetric : IEncryptor
             byte[] encryptedSymmetricIV;
 
 
-            RSAParameters rsaKeyInfo = new RSAParameters();
+            // RSAParameters rsaKeyInfo = new RSAParameters();
             /** RSA PUBLIC KEY = = modulus + exponent **/
-            rsaKeyInfo.Modulus = _modulus;
-            rsaKeyInfo.Exponent = _exponent;
-            rsa.ImportParameters(rsaKeyInfo);
-
+            // rsaKeyInfo.Modulus = _modulus;
+            // rsaKeyInfo.Exponent = _exponent;
+            // rsa.ImportParameters(rsaKeyInfo);
 
             //Create a new instance of the default Aes implementation class.  
             Aes aes = Aes.Create();
@@ -67,14 +72,14 @@ class Assymetric : IEncryptor
             {
                 streamWriter.WriteLine(text);
             }
+
             //Encrypt the symmetric key and IV.  
             encryptedSymmetricKey = rsa.Encrypt(aes.Key, RSAEncryptionPadding.Pkcs1);
             encryptedSymmetricIV = rsa.Encrypt(aes.IV, RSAEncryptionPadding.Pkcs1);
 
-            var privateKey = rsa.ExportRSAPrivateKey();
-            File.WriteAllBytes("Foo.txt", privateKey);
+            var rsaXmlString = rsa.ToXmlString(true);
 
-            SaveKeys(encryptedSymmetricKey, encryptedSymmetricIV, privateKey);
+            SaveKeys(encryptedSymmetricKey, encryptedSymmetricIV, rsaXmlString);
 
         }
 
@@ -85,22 +90,21 @@ class Assymetric : IEncryptor
     {
         try
         {
+            var retrievedKeys = GetKeys();
+
             RSA rsa = RSA.Create();
+            rsa.FromXmlString(retrievedKeys.RSAXmlString);
 
-            // var key = rsa.Decrypt(encryptedSymmetricKey, RSAEncryptionPadding.Pkcs1);
-            // var iv = rsa.Decrypt(encryptedSymmetricIV, RSAEncryptionPadding.Pkcs1);
+            var key = rsa.Decrypt(retrievedKeys.AesKey, RSAEncryptionPadding.Pkcs1);
+            var iv = rsa.Decrypt(retrievedKeys.Iv, RSAEncryptionPadding.Pkcs1);
 
-            // using (FileStream encryptedStream = new FileStream($"{Path.ENCRYPTED_FILES}/{OutputFile.Assymetric}.txt", FileMode.OpenOrCreate))
-            // using (Aes aes = Aes.Create())
-            // {
+            using (FileStream encryptedStream = new FileStream($"{Path.ENCRYPTED_FILES}/{OutputFile.Assymetric}.txt", FileMode.OpenOrCreate))
+            using (Aes aes = Aes.Create())
+            {
+                var aesDecryptor = aes.CreateDecryptor(key, iv);
 
-            //     byte[] key = new byte[5];
-            //     byte[] iv = new byte[5];
-
-            //     var aesDecryptor = aes.CreateDecryptor(key, iv);
-
-            //     Core.AesDecryption(encryptedStream, aesDecryptor, OutputFile.Assymetric);
-            // }
+                Core.AesDecryption(encryptedStream, aesDecryptor, OutputFile.Assymetric);
+            }
         }
         catch (System.Exception)
         {
@@ -110,16 +114,28 @@ class Assymetric : IEncryptor
 
     }
 
-    private void SaveKeys(byte[] encryptedSymmetricKey, byte[] encryptedSymmetricIV, byte[] privateKey)
+    private void SaveKeys(byte[] encryptedSymmetricKey, byte[] encryptedSymmetricIV, string privateKey)
     {
         File.WriteAllBytes($"{Path.KEYS}/{Key.AES_KEY}.txt", encryptedSymmetricKey);
         File.WriteAllBytes($"{Path.KEYS}/{Key.IV}.txt", encryptedSymmetricIV);
-        File.WriteAllBytes($"{Path.KEYS}/{Key.PRIVATE_KEY}.txt", privateKey);
+        File.WriteAllText($"{Path.KEYS}/{Key.PRIVATE_KEY}.txt", privateKey);
     }
 
-    private void RetrieveKeys()
+    private RetrievedKeys GetKeys()
     {
+        try
+        {
+            var aesKey = File.ReadAllBytes($"{Path.KEYS}/{Key.AES_KEY}.txt");
+            var iv = File.ReadAllBytes($"{Path.KEYS}/{Key.IV}.txt");
+            var privateKey = File.ReadAllText($"{Path.KEYS}/{Key.PRIVATE_KEY}.txt");
 
+            return new RetrievedKeys(aesKey, iv, privateKey);
+        }
+        catch (System.Exception)
+        {
+            Console.WriteLine("Erro ao recuperar as chaves.");
+            throw;
+        }
     }
 
 }
